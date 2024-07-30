@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'hotel.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class HotelDetailPage extends StatelessWidget {
   final Hotel hotel;
@@ -26,7 +25,7 @@ class HotelDetailPage extends StatelessWidget {
             Text(hotel.description),
             SizedBox(height: 16),
             FutureBuilder<double>(
-              future: _calculateDistance(hotel.location), 
+              future: _calculateDistance(hotel.location),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
@@ -94,27 +93,15 @@ class HotelDetailPage extends StatelessWidget {
       }
 
       print('Searching nearby hotels for address: $address');
-      final String apiKey = 'YOUR_GOOGLE_API_KEY'; // Replace with your Google API key
-      List<Location> locations = await locationFromAddress(address);
-      if (locations.isEmpty) {
-        throw Exception('No locations found for the address');
-      }
+      final CollectionReference nearbyHotels = FirebaseFirestore.instance.collection('nearby');
 
-      Location location = locations.first;
-      print('Geocoded address to: ${location.latitude}, ${location.longitude}');
-      final url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
-          'location=${location.latitude},${location.longitude}&radius=1500&type=hotel&key=$apiKey';
-
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode != 200) {
-        throw Exception('Failed to load nearby hotels, status code: ${response.statusCode}');
-      }
-
-      final data = jsonDecode(response.body);
-      List<dynamic> results = data['results'];
-      if (results == null || results.isEmpty) {
+      QuerySnapshot querySnapshot = await nearbyHotels.get();
+      if (querySnapshot.docs.isEmpty) {
         throw Exception('No nearby hotels found');
       }
+
+      List<QueryDocumentSnapshot> results = querySnapshot.docs;
+      print('Found ${results.length} nearby hotels');
 
       showDialog(
         context: context,
@@ -123,9 +110,10 @@ class HotelDetailPage extends StatelessWidget {
           content: SingleChildScrollView(
             child: ListBody(
               children: results.map((hotel) {
+                var hotelData = hotel.data() as Map<String, dynamic>;
                 return ListTile(
-                  title: Text(hotel['name']),
-                  subtitle: Text(hotel['vicinity']),
+                  title: Text(hotelData['name']),
+                  subtitle: Text(hotelData['vicinity']),
                 );
               }).toList(),
             ),
