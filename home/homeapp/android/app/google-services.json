@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "75997641919",
+    "project_id": "homedemo-808db",
+    "storage_bucket": "homedemo-808db.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75997641919:android:e69ac0c7e4e25a10979a0a",
+        "android_client_info": {
+          "package_name": "com.example.homea"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC94pkzRaJ6dKVHI3INMA-PZTisVn-STF4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
